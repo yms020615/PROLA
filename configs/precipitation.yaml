@@ -1,0 +1,25 @@
+task: precipitation
+seed: 0
+adapter:
+  principal_rank: 4
+  orthogonal_rank: 4
+  alpha: 1.0
+  svd_iterations: 16
+  update_scaling: true
+training:
+  epochs: 10
+  batch_size: 4
+  effective_batch_size: 32
+  lr: 0.000375
+  warmup_epochs: 1
+  warmup_lr: 0.000001
+  min_lr: 0.000001
+  weight_decay: 0.05
+  clip_grad: null
+  bf16: true
+data:
+  inputs: frames
+  climatology: climatology
+  train: [2007-01-01, 2017-01-01]
+  validation: [2017-01-01, 2018-01-01]
+  test: [2018-01-01, 2019-01-01]
