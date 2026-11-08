@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="117" height="26" viewBox="0 0 117 26" role="img" aria-label="Code: PyTorch">
+  <title>Code: PyTorch</title>
+  <clipPath id="shape"><rect width="117" height="26" rx="4"/></clipPath>
+  <g clip-path="url(#shape)"><rect width="48" height="26" fill="#334155"/><rect x="48" width="69" height="26" fill="#BA4723"/></g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,DejaVu Sans,sans-serif" font-size="11"><text x="24.0" y="17">Code</text><text x="82.5" y="17">PyTorch</text></g>
+</svg>

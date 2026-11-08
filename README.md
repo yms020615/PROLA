@@ -1,46 +1,73 @@
-<div align="center">
-
-# PROLA
-
-### Principal-Orthogonal Low-rank Adaptation<br>for Predictive Spatiotemporal Weather Downscaling
-
-Minseo Yoon · Minseong Bae · Sojin Lee · Hyunwoo J. Kim
-
-**KAIST · NeurIPS 2026**
-
-[Overview](#overview) · [Results](#results) · [Quick start](#quick-start) · [Data](docs/data.md) · [Citation](#citation)
-
-</div>
-
-**From coarse weather states to fine-scale future predictions.** PROLA adapts pretrained weather models through complementary principal and orthogonal low-rank branches.
+<h1 align="center">🌦️ PROLA</h1>
+<h3 align="center">Principal-Orthogonal Low-rank Adaptation<br>for Predictive Spatiotemporal Weather Downscaling</h3>
 
 <p align="center">
-  <img src="docs/assets/cerra_t2m_6h.png" width="1000" alt="ERA5-to-CERRA temperature predictions at 6h: LoRA, PROLA, and ground truth over Central Europe.">
+  <a href="#citation"><img src="docs/assets/neurips.svg" alt="NeurIPS 2026"></a>
+  <a href="#getting-started"><img src="docs/assets/pytorch.svg" alt="PyTorch implementation"></a>
+  <a href="LICENSE"><img src="docs/assets/license.svg" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <b>Minseo Yoon · Minseong Bae · Sojin Lee · Hyunwoo J. Kim</b><br>
+  KAIST
+</p>
+
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#results">Results</a> ·
+  <a href="#getting-started">Getting started</a> ·
+  <a href="docs/data.md">Data</a> ·
+  <a href="#citation">Citation</a>
+</p>
+
+<p align="center">
+  <img src="docs/assets/cerra_t2m_6h.png" width="1000" alt="6h temperature forecasts over Central Europe from LoRA and PROLA, alongside the CERRA ground truth.">
   <br>
-  <em>ERA5-to-CERRA downscaling: 2m temperature at 6h, valid on 4 February 2018 at 12:00 UTC.</em>
+  <em>Fine-scale temperature structure, six hours ahead. LoRA, PROLA, and the CERRA target.</em>
 </p>
 
-## Overview
+> **TL;DR** — We introduce **PSWD** to predict high-resolution weather from coarse inputs, and **PROLA** to adapt pretrained weather models with complementary **principal and orthogonal** low-rank branches. PROLA improves on the evaluated low-rank baselines with just **3.92M trainable parameters** in our main setting.
 
-**PSWD** combines spatial refinement, temporal refinement, and future prediction. A scaffold-and-correct pipeline pairs a pretrained weather backbone with lightweight spatial and temporal correction heads.
+---
 
-**PROLA** splits a fixed rank budget between pretrained principal directions and their orthogonal complement, then uses gradient signals to scale optimizer updates. The main PSWD model trains **3.92M parameters**, less than **0.4%** of the full backbone size.
+<a id="overview"></a>
+
+## 🌍 Overview
+
+Coarse weather states capture broad atmospheric patterns. **Predictive Spatiotemporal Weather Downscaling (PSWD)** asks the model to recover finer spatial detail while predicting its evolution at higher temporal resolution.
+
+We approach this with a **scaffold-and-correct pipeline**: a shared pretrained weather backbone builds the forecast, and lightweight spatial and temporal heads learn the corrections.
 
 <p align="center">
-  <img src="docs/assets/prola_overview.png" width="1000" alt="PROLA architecture: principal and orthogonal low-rank branches, followed by gradient-guided scaling of optimizer updates.">
+  <img src="docs/assets/pswd_pipeline.png" width="1000" alt="PSWD pipeline: spatial upsampling, a shared weather backbone, and spatial and temporal correction heads produce future high-resolution fields.">
 </p>
 
-This repository covers three weather tasks:
+**PROLA adapts the backbone through three ingredients:**
 
-| Task | Prediction |
-| --- | --- |
-| **PSWD** | 5.625° global inputs → 1.5° hourly forecasts at 1–6h |
-| **ERA5-to-CERRA** | Coarse ERA5 inputs → regional CERRA fields at 3h and 6h |
-| **Regional precipitation** | Regional ERA5 inputs → 6h rainfall totals ending at 12h, 24h, and 36h |
+- **Principal branch** — starts from the pretrained weight's leading singular directions.
+- **Orthogonal branch** — learns complementary corrections outside those selected subspaces.
+- **Gradient-guided updates** — scales optimizer updates across branches and rank components.
 
-## Results
+<details>
+<summary><b>🔍 A closer look at PROLA</b></summary>
 
-Main PSWD results from the paper: **3h latitude-weighted RMSE ↓**, averaged over three seeds.
+<p align="center">
+  <img src="docs/assets/prola_overview.png" width="1000" alt="PROLA's principal and orthogonal branches and gradient-guided update scaling.">
+</p>
+
+</details>
+
+The repository includes three weather tasks:
+
+| 🌐 Global PSWD | 🗺️ ERA5-to-CERRA | 🌧️ Regional precipitation |
+| :---: | :---: | :---: |
+| Hourly high-resolution forecasts from coarse global states | Regional weather downscaling from ERA5 to CERRA | Forecasting regional rainfall accumulations |
+
+<a id="results"></a>
+
+## 📊 Main results
+
+PROLA achieves the lowest RMSE among the evaluated low-rank methods across all five variables at both 3h and 6h. Below are the paper's **3h latitude-weighted RMSE ↓**, averaged over three seeds.
 
 | Method | Z500 | T850 | T2M | U10 | V10 |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -51,35 +78,49 @@ Main PSWD results from the paper: **3h latitude-weighted RMSE ↓**, averaged ov
 | OPLoRA | 54.94 | 0.899 | 1.204 | 1.223 | 1.185 |
 | **PROLA** | **50.58** | **0.864** | **1.129** | **1.143** | **1.120** |
 
-## Quick start
+---
 
-Tested with Python 3.10 and PyTorch 2.5.1. From the repository root:
+<a id="getting-started"></a>
+
+## 🚀 Getting started
+
+Start with the CPU example, then try the weather pipeline or train on your own prepared data. Tested with Python 3.10 and PyTorch 2.5.1.
+
+<details open>
+<summary><b>⚡ Try PROLA on CPU</b></summary>
+
+From the repository root:
 
 ```bash
-pip install -e '.[weather]'
+pip install -e .
 python examples/minimal_prola.py
 ```
 
-The example runs PROLA updates on CPU without downloading data or model weights.
+A self-contained example of PROLA adaptation on a small model.
+
+</details>
 
 <details>
-<summary>Try a weather example with synthetic data</summary>
+<summary><b>🌦️ Try the weather pipeline</b></summary>
+
+Run training and evaluation with synthetic data and a small randomly initialized backbone:
 
 ```bash
+pip install -e '.[weather]'
 python -m prola.train --config configs/pswd.yaml \
   --smoke-test --device cpu --output-dir runs/pswd_demo
 python -m prola.evaluate --run-dir runs/pswd_demo --device cpu
 ```
 
-This checks training and evaluation with a small randomly initialized backbone.
-
 </details>
 
-## Training and evaluation
+<details>
+<summary><b>🛰️ Training and evaluation</b></summary>
 
 Prepare the [data](docs/data.md) and the `aurora-0.25-pretrained.ckpt` weights from [Aurora](https://github.com/microsoft/aurora), then run:
 
 ```bash
+pip install -e '.[weather]'
 python -m prola.train --config configs/pswd.yaml \
   --data-root data/pswd \
   --backbone-checkpoint checkpoints/aurora-0.25-pretrained.ckpt \
@@ -91,18 +132,19 @@ python -m prola.evaluate --run-dir runs/pswd \
 
 For the regional tasks, use [`cerra.yaml`](configs/cerra.yaml) or [`precipitation.yaml`](configs/precipitation.yaml) with the corresponding data and output directories.
 
-## Code
+</details>
 
-```text
-src/prola/
-  adapters/  models/  tasks/  data/  metrics/
-  train.py   evaluate.py   training.py
-configs/
-examples/
-tests/
-```
+## 🗂️ Code
 
-## Citation
+- [Adapters](src/prola/adapters/) · [Models](src/prola/models/) · [Tasks](src/prola/tasks/) · [Data](src/prola/data/) · [Metrics](src/prola/metrics/)
+- [Training](src/prola/train.py) · [Evaluation](src/prola/evaluate.py)
+- [Configs](configs/) · [Examples](examples/) · [Tests](tests/)
+
+<a id="citation"></a>
+
+## 📝 Citation
+
+If you find PROLA useful in your research, please cite:
 
 ```bibtex
 @inproceedings{yoon2026prola,
@@ -113,6 +155,6 @@ tests/
 }
 ```
 
-## Acknowledgments
+## 🤝 Acknowledgments
 
-Our weather implementation builds on [Aurora](https://github.com/microsoft/aurora). See [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES).
+We thank the [Aurora](https://github.com/microsoft/aurora) team for sharing their model and implementation. See [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES).
