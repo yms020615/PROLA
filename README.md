@@ -48,14 +48,11 @@ We approach this with a **scaffold-and-correct pipeline**: a shared pretrained w
 - **Orthogonal branch** — learns complementary corrections outside those selected subspaces.
 - **Gradient-guided updates** — scales optimizer updates across branches and rank components.
 
-<details>
-<summary><b>🔍 A closer look at PROLA</b></summary>
+### 🔍 A closer look at PROLA
 
 <p align="center">
   <img src="docs/assets/prola_overview.png" width="1000" alt="PROLA's principal and orthogonal branches and gradient-guided update scaling.">
 </p>
-
-</details>
 
 The repository includes three weather tasks:
 
